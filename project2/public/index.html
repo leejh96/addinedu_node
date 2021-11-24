@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Welcome to Firebase Hosting</title>
+
+  <!-- update the version number as needed
+  <!-- <script defer src="/__/firebase/9.5.0/firebase-app-compat.js"></script> -->
+  <!-- include only the Firebase features as you need -->
+  <!-- <script defer src="/__/firebase/9.5.0/firebase-auth-compat.js"></script>
+  <script defer src="/__/firebase/9.5.0/firebase-database-compat.js"></script>
+  <script defer src="/__/firebase/9.5.0/firebase-firestore-compat.js"></script>
+  <script defer src="/__/firebase/9.5.0/firebase-functions-compat.js"></script>
+  <script defer src="/__/firebase/9.5.0/firebase-messaging-compat.js"></script>
+  <script defer src="/__/firebase/9.5.0/firebase-storage-compat.js"></script>
+  <script defer src="/__/firebase/9.5.0/firebase-analytics-compat.js"></script>
+  <script defer src="/__/firebase/9.5.0/firebase-remote-config-compat.js"></script>
+  <script defer src="/__/firebase/9.5.0/firebase-performance-compat.js"></script> -->
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+
+  <!-- 일반 cdn쓰듯이 사용하면 firebase는 에러(보안에러)가 나서 cdn 주소로 들어가 해당 js파일을 저장해서 public의 js로 저장 -->
+  <!-- jquery cdn -->
+  <script src="js/jquery.js"></script>
+
+  <!-- 
+      initialize the SDK after all desired features are loaded, set useEmulator to false
+      to avoid connecting the SDK to running emulators.
+    -->
+  <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+
+  <style media="screen">
+    body {
+      background: #ECEFF1;
+      color: rgba(0, 0, 0, 0.87);
+      font-family: Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    #message {
+      background: white;
+      max-width: 600px;
+      margin: 100px auto 16px;
+      padding: 32px 24px;
+      border-radius: 3px;
+      text-align: center;
+    }
+
+    #message h2 {
+      color: #ffa100;
+      font-weight: bold;
+      font-size: 16px;
+      margin: 0 0 8px;
+    }
+
+    #message h1 {
+      font-size: 22px;
+      font-weight: 300;
+      color: rgba(0, 0, 0, 0.6);
+      margin: 0 0 16px;
+    }
+
+    #message p {
+      line-height: 140%;
+      margin: 16px 0 24px;
+      font-size: 14px;
+    }
+
+    #message a {
+      display: block;
+      text-align: center;
+      background: #039be5;
+      text-transform: uppercase;
+      text-decoration: none;
+      color: white;
+      padding: 16px;
+      border-radius: 4px;
+    }
+
+    #message,
+    #message a {
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    }
+
+    #load {
+      color: rgba(0, 0, 0, 0.4);
+      text-align: center;
+      font-size: 13px;
+    }
+
+    @media (max-width: 600px) {
+
+      body,
+      #message {
+        margin-top: 0;
+        background: white;
+        box-shadow: none;
+      }
+
+      body {
+        border-top: 16px solid #ffa100;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="message">
+    <h2>중고 자동차 쇼핑몰</h2>
+    <h1>중고차 매매 단지</h1>
+    <p>세상의 모든 중고차들</p>
+
+    <p>
+      차종: <input type="text" id="name" value="testcar" /><br>
+      가격: <input type="text" id="price" value="1500" /><br>
+      제조사: <input type="text" id="company" value="samsung" /><br>
+      연식: <input type="text" id="year" value="2017" /><br>
+      <input type="button" id="saveBtn" value="제출">
+    </p>
+    <p>
+      검색
+      <input type="text" id="search">
+      <input type="button" id="searchBtn"" value=" 검색">
+    </p>
+    <table id="search_list" width="550" border="1"></table>
+    <table id="car_list" width="550" border="1"></table>
+  </div>
+
+  <script type="text/javascript">
+    let app = null;
+    let carList = [];
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const loadEl = document.querySelector('#load');
+      try {
+        const db = firebase.firestore();
+        // 이 부분에 파이어베이스 api 사용코드 넣기
+
+        // firebase.auth().onAuthStateChanged(user => { });
+        // firebase.firestore().doc('/foo/bar').get().then(() => { });
+        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
+
+        // set은 id값을 지정하지만 add는 자동으로 id값을 지정함
+        // db.collection("car").add({
+        //   name: "s80",
+        //   price: 2000,
+        //   company: "volvo",
+        //   year: 2018
+        // })
+        //   .then((docRef) => {
+        //     console.log("Document written with ID: ", docRef.id);
+        //   })
+        //   .catch((error) => {
+        //     console.error("Error adding document: ", error);
+        //   });
+        // $('#saveBtn').click(saveData());
+
+        function loadData() {
+          //데이터 읽기
+          if (db) {
+            carList = []
+            db.collection('car').get().then(querySnapshot => {
+              querySnapshot.forEach(doc => {
+                carList.push({
+                  objectId: doc.id,
+                  name: doc.data().name,
+                  price: doc.data().price,
+                  company: doc.data().company,
+                  year: doc.data().year,
+                })
+              })
+              showList(carList);
+            })
+          } else {
+            console.log('db연결 실패')
+          }
+        }
+        function showList(arr) {
+          let tbTmp = `
+          <tr>
+            <th>코드</th>  
+            <th>차종</th>  
+            <th>가격</th>  
+            <th>제조사</th>  
+            <th>연식</th>  
+          </tr>`;
+          if (db) {
+            for (let i of arr) {
+              tbTmp += `<tr>
+                <td>${i.objectId}</td>
+                <td>${i.name}</td>
+                <td>${i.price}</td>
+                <td>${i.company}</td>
+                <td>${i.year}</td>
+              </tr>`
+            }
+            $('#car_list').html(tbTmp);
+          } else {
+            console.log('db연결 실패')
+          }
+        }
+        function saveData() {
+          db.collection("car").add({
+            name: $('#name').val(),
+            price: parseInt($('#price').val()),
+            company: $('#company').val(),
+            year: parseInt($('#year').val())
+          })
+            .then((docRef) => {
+              loadData();
+            })
+            .catch((error) => {
+              console.error("Error adding document: ", error);
+            });
+        }
+        document.querySelector('#saveBtn').addEventListener('click', saveData);
+        document.querySelector('#searchBtn').addEventListener('click', () => {
+          let tbTmp2 = `
+          <tr>
+            <th>코드</th>  
+            <th>차종</th>  
+            <th>가격</th>  
+            <th>제조사</th>  
+            <th>연식</th>  
+          </tr>`
+          const text = $('#search').val().toLowerCase();
+          for (let i of carList) {
+            if (i.name.toLowerCase().indexOf(text) !== -1) {
+              tbTmp2 += `<tr>
+                <td>${i.objectId}</td>
+                <td>${i.name}</td>
+                <td>${i.price}</td>
+                <td>${i.company}</td>
+                <td>${i.year}</td>
+              </tr>`
+            }
+          }
+          $('#search_list').html(tbTmp2)
+
+        });
+        loadData();
+      } catch (e) {
+        console.error(e);
+        loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
+      }
+    });
+
+    // 인증코드는 페이지 하단에 넣기
+    const fConfig = {
+      apiKey: "AIzaSyADmbs627bvtqlFg6sWb7YTq-ZeWlC6-0U",
+      authDomain: "addinedu-project.firebaseapp.com",
+      projectId: "addinedu-project",
+      storageBucket: "addinedu-project.appspot.com",
+      messagingSenderId: "359897577332",
+      appId: "1:359897577332:web:a199bf8279f7ac1d50de21"
+    };
+
+    // Initialize Firebase
+    if (!firebase.app.length) {
+      app = firebase.initializeApp(fConfig);
+    } else {
+      app = firebase.app;
+    }
+  </script>
+</body>
+
+</html>
