@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>test file upload</title>
+    <script src="js/jquery.js"></script>
+</head>
+
+<body>
+    <form action="">
+        <input type="file" class="file" id="imageSelector" name="imageSelector"
+            accept="image/jpeg, image/jpg, image/png" multiple>
+    </form>
+
+    <div id="preview-image"></div>
+
+    <script>
+
+        function readImage(input) {
+            //파일이 한개이상 선택됨
+            if (input.files.length !== 0 && input.files[0]) {
+                //file reader 객체 : 파일소스를 읽어오는 객체(js 내부객체)
+                const reader = new FileReader();
+                //이미지를 모두 읽어온 후 실행
+                reader.onload = (e) => {
+                    const img = `<img src=${e.target.result} width="150"/>`
+                    $('#preview-image').append(img);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+        function deleteImg(id) {
+            $(`#${id}`).remove();
+        }
+
+        function readImagePreview(input) {
+            if (input.files.length !== 0 && input.files[0]) {
+                const readfileURL = URL.createObjectURL(input.files[0]);
+                const img = `<img src=${readfileURL} width="150"/>
+                <button type='button' id='deleteBtn'>삭제</button>
+                `
+                $('#preview-image').append(img);
+
+                // 이미지 로딩 후 메모리 해제
+                $('#preview-image > img').on('load', function (e) {
+                    URL.revokeObjectURL($(this).attr('src'));
+                })
+                $('#deleteBtn').on('click', () => {
+                    input.value = '';
+                    deleteImg();
+                })
+            }
+        }
+        // 다중파일 업로드
+        function readImageMultiPreview(input) {
+            for (let i = 0; i < input.files.length; i++) {
+                const readfileURL = URL.createObjectURL(input.files[i]);
+                let img = `
+                    <img src=${readfileURL} class="img" width="150"/>
+                    <button data-index=${input.files[i].lastModified} type='button' class='deleteBtn'>삭제</button>
+                `
+                $('#preview-image').append(img);
+
+                // 이미지 로딩 후 메모리 해제
+                $('#preview-image>img').on('load', function (e) {
+                    URL.revokeObjectURL($(this).attr('src'));
+                    $('.deleteBtn').on('click', function (e) {
+                        const dataTranster = new DataTransfer();
+                        const arr = Array.from(input.files)
+                        const newArr = arr.filter(file => file.lastModified != e.target.dataset.index)
+
+                        newArr.forEach(file => {
+                            dataTranster.items.add(file);
+                        });
+                        input.files = dataTranster.files;
+
+                        if (this) {
+                            const imgItem = $(this).prev();
+                            $(this).remove()
+                            imgItem.remove();
+
+                        });
+                });
+            }
+
+        }
+        $('#imageSelector').on('change', (e) => {
+            // 첫번째 방법
+            // readImage(e.target);
+
+            // 두번째 방법
+            // readImagePreview(e.target);
+            readImageMultiPreview(e.target);
+        });
+    </script>
+</body>
+
+</html>

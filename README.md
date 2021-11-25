@@ -1,8 +1,99 @@
 # Node
 
+## 파일업로드(Client)
+
+```
+<body>
+<!-- multiple 설정 시 여러개의 이미지 가져올 수 있음  -->
+  <input type="file" class="file" id="imageSelector" name="imageSelector"
+      accept="image/jpeg, image/jpg, image/png" multiple>
+  <div id="preview-image"></div>
+</body>
+<script>
+    function readImage(input) {
+        //파일이 한개이상 선택됨
+        if (input.files.length !== 0 && input.files[0]) {
+            //file reader 객체 : 파일소스를 읽어오는 객체(js 내부객체)
+            const reader = new FileReader();
+            //이미지를 모두 읽어온 후 실행
+            reader.onload = (e) => {
+                const img = `<img src=${e.target.result} width="150"/>`
+                $('#preview-image').append(img);
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+    function deleteImg(id) {
+        $(`#${id}`).remove();
+    }
+
+    function readImagePreview(input) {
+        if (input.files.length !== 0 && input.files[0]) {
+            const readfileURL = URL.createObjectURL(input.files[0]);
+            const img = `<img src=${readfileURL} width="150"/>
+            <button type='button' id='deleteBtn'>삭제</button>
+            `
+            $('#preview-image').append(img);
+
+            // 이미지 로딩 후 객체 URL을 해제하여 메모리 해제
+            $('#preview-image > img').on('load', function (e) {
+                URL.revokeObjectURL($(this).attr('src'));
+            })
+            $('#deleteBtn').on('click', () => {
+                input.value = '';
+                deleteImg();
+            })
+        }
+    }
+    // 다중파일 업로드
+    function readImageMultiPreview(input) {
+        for (let i = 0; i < input.files.length; i++) {
+            const readfileURL = URL.createObjectURL(input.files[i]);
+            let img = `
+                <img src=${readfileURL} class="img" width="150"/>
+                <button data-index=${input.files[i].lastModified} type='button' class='deleteBtn'>삭제</button>
+            `
+            $('#preview-image').append(img);
+
+            // 이미지 로딩 후 메모리 해제
+            $('#preview-image>img').on('load', function (e) {
+                URL.revokeObjectURL($(this).attr('src'));
+                $('.deleteBtn').on('click', function (e) {
+                    const dataTranster = new DataTransfer();
+                    const arr = Array.from(input.files)
+                    const newArr = arr.filter(file => file.lastModified != e.target.dataset.index)
+
+                    newArr.forEach(file => {
+                        dataTranster.items.add(file);
+                    });
+                    input.files = dataTranster.files;
+
+                    if (this) {
+                        const imgItem = $(this).prev();
+                        $(this).remove()
+                        imgItem.remove();
+
+                    });
+            });
+        }
+
+    }
+    $('#imageSelector').on('change', (e) => {
+        // 첫번째 방법
+        // readImage(e.target);
+
+        // 두번째 방법
+        // readImagePreview(e.target);
+        
+        // 세번째 방법(다중업로드)
+        readImageMultiPreview(e.target);
+    });
+</script>
+```
+
 ## Firebase
 - 구글에서 제공하는 DB, Storage, hosting 등 다양한 기능 제공
-- 공식문서(https://firebase.google.com/docs)
+- [공식문서](https://firebase.google.com/docs)
 
 - Firebase
 > npm i -g firebase-tools
@@ -80,7 +171,7 @@ querySnapshot.forEach((doc) => {
 ```
 
 **데이터 추가**
-- set : 문서를 만들거나 덮어쓰려는 경우에 사용, 문서의 ID 필요
+- set : 문서를 만들거나 덮어쓰려는 경우에 사용, 문서의 ID 필요(수정도 가능)
 - add : 유의미한 ID를 두지 않을 경우에 자동으로 ID를 생성하고 데이터를 추가하는 메소드
 - 웹 버전8(namespaced)
 ```
@@ -130,4 +221,55 @@ const docRef = await addDoc(collection(db, "cities"), {
   name: "Tokyo",
   country: "Japan"
 });
+```
+**데이터 삭제**
+```
+db.collection("cities").doc("DC").delete().then(() => {
+    console.log("Document successfully deleted!");
+}).catch((error) => {
+    console.error("Error removing document: ", error);
+});
+```
+
+### Storage
+- 이미지나 업로드 파일을 저장하는 공간
+- 접근이 거부되면 스토리지의 rules를 봐야함
+
+**시작하기**
+```
+var db = firebase.firestore();
+
+var storageRef = storage.ref(); //스토리지와 연결하기 위한 참조설정
+var imagesRef = storageRef.child('폴더이름/파일이름'); //스토리지에 images폴더로 패스 지정
+```
+
+**파일 업로드**
+```
+//이미지 업로드
+const fileData = $('#imageSelector')[0].files[0];
+
+imagesRef.put(fileData)
+.then(snapshot => {
+  snapshot.ref.getDownloadURL()
+    .then(res => {
+      const imgUrl = res;
+      putData(name, price, company, year, newFileName, imgUrl);
+    })
+    .catch(err => {
+      console.error("Error put file" + err);
+    })
+})
+.catch(err => {
+  console.error("Error getDownloadURL" + err);
+})
+
+//이미지 삭제
+imagesRef(`photo/${imgUrl}`).delete()
+.then(res => {
+  console.log('이미지삭제 완료')
+  loadData();
+})
+.catch(err => {
+  console.error('del Storage err' + err);
+})
 ```

@@ -6,19 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Welcome to Firebase Hosting</title>
 
-  <!-- update the version number as needed
-  <!-- <script defer src="/__/firebase/9.5.0/firebase-app-compat.js"></script> -->
-  <!-- include only the Firebase features as you need -->
-  <!-- <script defer src="/__/firebase/9.5.0/firebase-auth-compat.js"></script>
-  <script defer src="/__/firebase/9.5.0/firebase-database-compat.js"></script>
-  <script defer src="/__/firebase/9.5.0/firebase-firestore-compat.js"></script>
-  <script defer src="/__/firebase/9.5.0/firebase-functions-compat.js"></script>
-  <script defer src="/__/firebase/9.5.0/firebase-messaging-compat.js"></script>
-  <script defer src="/__/firebase/9.5.0/firebase-storage-compat.js"></script>
-  <script defer src="/__/firebase/9.5.0/firebase-analytics-compat.js"></script>
-  <script defer src="/__/firebase/9.5.0/firebase-remote-config-compat.js"></script>
-  <script defer src="/__/firebase/9.5.0/firebase-performance-compat.js"></script> -->
-
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -27,11 +14,6 @@
   <!-- 일반 cdn쓰듯이 사용하면 firebase는 에러(보안에러)가 나서 cdn 주소로 들어가 해당 js파일을 저장해서 public의 js로 저장 -->
   <!-- jquery cdn -->
   <script src="js/jquery.js"></script>
-
-  <!-- 
-      initialize the SDK after all desired features are loaded, set useEmulator to false
-      to avoid connecting the SDK to running emulators.
-    -->
   <script defer src="/__/firebase/init.js?useEmulator=true"></script>
 
   <style media="screen">
@@ -41,6 +23,15 @@
       font-family: Roboto, Helvetica, Arial, sans-serif;
       margin: 0;
       padding: 0;
+    }
+
+    #detail {
+      display: none;
+    }
+
+    #detail.toggle {
+      display: flex;
+      justify-content: center;
     }
 
     #message {
@@ -115,13 +106,17 @@
     <h2>중고 자동차 쇼핑몰</h2>
     <h1>중고차 매매 단지</h1>
     <p>세상의 모든 중고차들</p>
-
+    <input type="hidden" name="id" id="id">
     <p>
       차종: <input type="text" id="name" value="testcar" /><br>
       가격: <input type="text" id="price" value="1500" /><br>
       제조사: <input type="text" id="company" value="samsung" /><br>
       연식: <input type="text" id="year" value="2017" /><br>
-      <input type="button" id="saveBtn" value="제출">
+      사진: <input type="file" class="file" id="imageSelector" name="imageSelector"
+        accept="image/jpeg, image/jpg, image/png" multiple>
+    <div id="preview-image"></div>
+    <input type="button" id="saveBtn" value="제출">
+    <input type="button" id="putBtn" value="수정">
     </p>
     <p>
       검색
@@ -130,98 +125,267 @@
     </p>
     <table id="search_list" width="550" border="1"></table>
     <table id="car_list" width="550" border="1"></table>
+
+    <div id="detail">
+      <img src="" alt="" id="detail-img">
+      <ul>
+        <li>차종 : <span id="detail-name"></span></li>
+        <li>가격 : <span id="detail-price"></span></li>
+        <li>제조사 : <span id="detail-company"></span></li>
+        <li>연식 : <span id="detail-year"></span></li>
+      </ul>
+    </div>
   </div>
 
-  <script type="text/javascript">
-    let app = null;
-    let carList = [];
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const loadEl = document.querySelector('#load');
-      try {
-        const db = firebase.firestore();
-        // 이 부분에 파이어베이스 api 사용코드 넣기
+</body>
 
-        // firebase.auth().onAuthStateChanged(user => { });
-        // firebase.firestore().doc('/foo/bar').get().then(() => { });
-        // firebase.storage().ref('/path/to/ref').getDownloadURL().then(() => { });
+</html>
+<!-- 이미지 업로드 -->
+<script>
+  function readImagePreview(input) {
+    if (input.files.length !== 0 && input.files[0]) {
+      const readfileURL = URL.createObjectURL(input.files[0]);
+      const img = `<img src=${readfileURL} width="150"/>
+            <button type='button' id='deleteBtn'>삭제</button>
+          `
+      $('#preview-image').append(img);
 
-        // set은 id값을 지정하지만 add는 자동으로 id값을 지정함
-        // db.collection("car").add({
-        //   name: "s80",
-        //   price: 2000,
-        //   company: "volvo",
-        //   year: 2018
-        // })
-        //   .then((docRef) => {
-        //     console.log("Document written with ID: ", docRef.id);
-        //   })
-        //   .catch((error) => {
-        //     console.error("Error adding document: ", error);
-        //   });
-        // $('#saveBtn').click(saveData());
+      // 이미지 로딩 후 메모리 해제
+      $('#preview-image > img').on('load', function (e) {
+        URL.revokeObjectURL($(this).attr('src'));
+      })
+      $('#deleteBtn').on('click', () => {
+        input.value = '';
+        $(`#preview-image`).html('');
 
-        function loadData() {
-          //데이터 읽기
-          if (db) {
-            carList = []
-            db.collection('car').get().then(querySnapshot => {
-              querySnapshot.forEach(doc => {
-                carList.push({
-                  objectId: doc.id,
-                  name: doc.data().name,
-                  price: doc.data().price,
-                  company: doc.data().company,
-                  year: doc.data().year,
-                })
+      })
+    }
+  }
+  $('#imageSelector').on('change', (e) => {
+    readImagePreview(e.target);
+  });
+</script>
+
+<!-- firebase -->
+<script type="text/javascript">
+  let app = null;
+  let carList = [];
+
+  document.addEventListener('DOMContentLoaded', function () {
+    try {
+      const db = firebase.firestore();
+      const storage = firebase.storage();
+      function loadData() {
+        //데이터 읽기
+        if (db) {
+          carList = []
+          db.collection('cars').get().then(querySnapshot => {
+            querySnapshot.forEach(doc => {
+              carList.push({
+                objectId: doc.id,
+                name: doc.data().name,
+                price: doc.data().price,
+                company: doc.data().company,
+                year: doc.data().year,
+                fileName: doc.data().fileName,
+                imgUrl: doc.data().imgUrl
               })
-              showList(carList);
             })
-          } else {
-            console.log('db연결 실패')
-          }
+            showList(carList);
+            $('.delRowBtn').on('click', (e) => {
+              const objectId = e.target.dataset.index;
+              const imgUrl = e.target.dataset.imgurl;
+              db.collection('cars').doc(objectId).delete()
+                .then(res => {
+                  console.log('DB데이터 삭제 완료')
+                  storage.ref().child(`photo/${imgUrl}`).delete()
+                    .then(res => {
+                      console.log('이미지삭제 완료')
+                      loadData();
+                    })
+                    .catch(err => {
+                      console.error('del Storage err' + err);
+                    })
+                })
+                .catch(err => {
+                  console.error("del DB err" + err)
+                })
+
+            })
+            $('.putRowBtn').on('click', (e) => {
+              const objectId = e.target.dataset.index;
+              $('#id').val(objectId);
+              for (let i of carList) {
+                if (i.objectId === objectId) {
+                  $('#name').val(i.name);
+                  $('#price').val(i.price);
+                  $('#company').val(i.company);
+                  $('#year').val(i.year);
+                  break;
+                }
+              }
+            })
+            $('.detailRowBtn').on('click', (e) => {
+              $('#detail')[0].classList.toggle("toggle");
+              const objectId = e.target.dataset.index;
+              for (let i of carList) {
+                if (i.objectId === objectId) {
+                  $('#detail-name').html(i.name);
+                  $('#detail-price').html(i.price);
+                  $('#detail-company').html(i.company);
+                  $('#detail-year').html(i.year);
+                  $('#detail-img').attr('src', i.imgUrl).attr('width', 150);
+                  break;
+                }
+              }
+            })
+
+          })
+        } else {
+          console.log('db연결 실패')
         }
-        function showList(arr) {
-          let tbTmp = `
+      }
+      function showList(arr) {
+        let tbTmp = `
           <tr>
-            <th>코드</th>  
+            <th>이미지</th>  
             <th>차종</th>  
             <th>가격</th>  
             <th>제조사</th>  
-            <th>연식</th>  
+            <th>연식</th>
+            <th>삭제</th>
+            <th>수정</th>
+            <th>상세보기</th>
           </tr>`;
-          if (db) {
-            for (let i of arr) {
-              tbTmp += `<tr>
-                <td>${i.objectId}</td>
+        if (db) {
+          for (let i of arr) {
+            tbTmp += `<tr><td><img src="${i.imgUrl}" width="150" height="100"/></td>
                 <td>${i.name}</td>
                 <td>${i.price}</td>
                 <td>${i.company}</td>
                 <td>${i.year}</td>
+                <td><input class="delRowBtn" data-index=${i.objectId} data-imgurl=${i.fileName} type="button" value="삭제"></td>
+                <td><input class="putRowBtn" data-index=${i.objectId} data-imgurl=${i.fileName} type="button" value="수정"></td>
+                <td><input class="detailRowBtn" data-index=${i.objectId} type="button" value="상세보기"></td>
               </tr>`
-            }
-            $('#car_list').html(tbTmp);
-          } else {
-            console.log('db연결 실패')
           }
+          $('#car_list').html(tbTmp);
+        } else {
+          console.log('db연결 실패')
         }
-        function saveData() {
-          db.collection("car").add({
-            name: $('#name').val(),
-            price: parseInt($('#price').val()),
-            company: $('#company').val(),
-            year: parseInt($('#year').val())
+      }
+      function saveData(name, price, company, year, fileName, imgUrl) {
+        db.collection("cars").add({
+          name: $('#name').val(),
+          price: parseInt($('#price').val()),
+          company: $('#company').val(),
+          year: parseInt($('#year').val()),
+          fileName,
+          imgUrl,
+          regDate: new Date()
+        })
+          .then((docRef) => {
+            loadData();
           })
-            .then((docRef) => {
-              loadData();
-            })
-            .catch((error) => {
-              console.error("Error adding document: ", error);
-            });
-        }
-        document.querySelector('#saveBtn').addEventListener('click', saveData);
-        document.querySelector('#searchBtn').addEventListener('click', () => {
-          let tbTmp2 = `
+          .catch((error) => {
+            console.error("Error adding document: ", error);
+          });
+      }
+
+      function putData(name, price, company, year, fileName, imgUrl) {
+        const objectId = $('#id').val();
+        db.collection("cars").doc(objectId).set({
+          name,
+          price,
+          company,
+          year,
+          fileName,
+          imgUrl,
+          regDate: new Date()
+        })
+          .then((docRef) => {
+            loadData();
+          })
+          .catch((error) => {
+            console.error("Error adding document: ", error);
+          });
+      }
+
+      document.querySelector('#saveBtn').addEventListener('click', () => {
+        const name = $('#name').val();
+        const price = parseInt($('#price').val());
+        const company = $('#company').val();
+        const year = parseInt($('#year').val());
+        const fileData = $('#imageSelector')[0].files[0];
+        const fileDataName = fileData.name;
+        const timestamp = new Date().getTime();
+        //확장자 추출
+        const suffix = fileDataName.substr(fileDataName.lastIndexOf('.'));
+        const newFileName = timestamp + suffix;
+
+        //firebase Storage에 폴더 만들기
+        const uploadRef = storage.ref(); //storage의 root
+        const fileSavePath = uploadRef.child('photo/' + newFileName)//photo 폴더패스지정
+
+        // 지정한 패스에 파일 저장
+        fileSavePath.put(fileData)
+          .then(snapshot => {
+            console.log('사진 저장 완료');
+            snapshot.ref.getDownloadURL()
+              .then(res => {
+                const imgUrl = res;
+                saveData(name, price, company, year, newFileName, imgUrl);
+              })
+              .then(() => {
+                // $('#imageSelector')[0].target.value = '';
+                console.log($('#imageSelector'));
+                $('#preview-image').html('');
+              })
+              .catch(err => {
+                console.error("Error put file" + err);
+              })
+          })
+          .catch(err => {
+            console.error("Error getDownloadURL" + err);
+          })
+      });
+      $('#putBtn').on('click', () => {
+        const name = $('#name').val();
+        const price = $('#price').val();
+        const company = $('#company').val();
+        const year = $('#year').val();
+        const fileData = $('#imageSelector')[0].files[0];
+        const fileDataName = fileData.name;
+        const timestamp = new Date().getTime();
+        //확장자 추출
+        const suffix = fileDataName.substr(fileDataName.lastIndexOf('.'));
+        const newFileName = timestamp + suffix;
+
+        //firebase Storage에 폴더 만들기
+        const uploadRef = storage.ref(); //storage의 root
+        const fileSavePath = uploadRef.child('photo/' + newFileName)//photo 폴더패스지정
+        fileSavePath.put(fileData)
+          .then(snapshot => {
+            snapshot.ref.getDownloadURL()
+              .then(res => {
+                const imgUrl = res;
+                putData(name, price, company, year, newFileName, imgUrl);
+              })
+              .then(() => {
+                $('#preview-image').html('');
+              })
+              .catch(err => {
+                console.error("Error put file" + err);
+              })
+          })
+          .catch(err => {
+            console.error("Error getDownloadURL" + err);
+          })
+      });
+
+      document.querySelector('#searchBtn').addEventListener('click', () => {
+        let tbTmp2 = `
           <tr>
             <th>코드</th>  
             <th>차종</th>  
@@ -229,45 +393,44 @@
             <th>제조사</th>  
             <th>연식</th>  
           </tr>`
-          const text = $('#search').val().toLowerCase();
-          for (let i of carList) {
-            if (i.name.toLowerCase().indexOf(text) !== -1) {
-              tbTmp2 += `<tr>
+        const text = $('#search').val().toLowerCase();
+        for (let i of carList) {
+          if (i.name.toLowerCase().indexOf(text) !== -1) {
+            tbTmp2 += `<tr>
                 <td>${i.objectId}</td>
                 <td>${i.name}</td>
                 <td>${i.price}</td>
                 <td>${i.company}</td>
                 <td>${i.year}</td>
               </tr>`
-            }
           }
-          $('#search_list').html(tbTmp2)
+        }
+        $('#search_list').html(tbTmp2)
 
-        });
-        loadData();
-      } catch (e) {
-        console.error(e);
-        loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
-      }
-    });
-
-    // 인증코드는 페이지 하단에 넣기
-    const fConfig = {
-      apiKey: "AIzaSyADmbs627bvtqlFg6sWb7YTq-ZeWlC6-0U",
-      authDomain: "addinedu-project.firebaseapp.com",
-      projectId: "addinedu-project",
-      storageBucket: "addinedu-project.appspot.com",
-      messagingSenderId: "359897577332",
-      appId: "1:359897577332:web:a199bf8279f7ac1d50de21"
-    };
-
-    // Initialize Firebase
-    if (!firebase.app.length) {
-      app = firebase.initializeApp(fConfig);
-    } else {
-      app = firebase.app;
+      });
+      loadData();
+    } catch (e) {
+      console.error(e);
+      loadEl.textContent = 'Error loading the Firebase SDK, check the console.';
     }
-  </script>
-</body>
+  });
+</script>
+<!-- firebase 인증 -->
+<script>
+  // 인증코드는 페이지 하단에 넣기
+  const fConfig = {
+    apiKey: "AIzaSyADmbs627bvtqlFg6sWb7YTq-ZeWlC6-0U",
+    authDomain: "addinedu-project.firebaseapp.com",
+    projectId: "addinedu-project",
+    storageBucket: "addinedu-project.appspot.com",
+    messagingSenderId: "359897577332",
+    appId: "1:359897577332:web:a199bf8279f7ac1d50de21"
+  };
 
-</html>
+  // Initialize Firebase
+  if (!firebase.app.length) {
+    app = firebase.initializeApp(fConfig);
+  } else {
+    app = firebase.app;
+  }
+</script>
