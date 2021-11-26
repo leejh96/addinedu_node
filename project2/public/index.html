@@ -291,6 +291,14 @@
           .catch((error) => {
             console.error("Error adding document: ", error);
           });
+
+        // 입력 후 값초기화
+        $('#name').val('');
+        $('#price').val('');
+        $('#company').val('');
+        $('#year').val('');
+        $('#imageSelector').val('');
+        $('#preview-image').text('');
       }
 
       function putData(name, price, company, year, fileName, imgUrl) {
@@ -323,6 +331,7 @@
         //확장자 추출
         const suffix = fileDataName.substr(fileDataName.lastIndexOf('.'));
         const newFileName = timestamp + suffix;
+        console.log(newFileName);
 
         //firebase Storage에 폴더 만들기
         const uploadRef = storage.ref(); //storage의 root
@@ -336,11 +345,6 @@
               .then(res => {
                 const imgUrl = res;
                 saveData(name, price, company, year, newFileName, imgUrl);
-              })
-              .then(() => {
-                // $('#imageSelector')[0].target.value = '';
-                console.log($('#imageSelector'));
-                $('#preview-image').html('');
               })
               .catch(err => {
                 console.error("Error put file" + err);
@@ -365,23 +369,31 @@
         //firebase Storage에 폴더 만들기
         const uploadRef = storage.ref(); //storage의 root
         const fileSavePath = uploadRef.child('photo/' + newFileName)//photo 폴더패스지정
-        fileSavePath.put(fileData)
-          .then(snapshot => {
-            snapshot.ref.getDownloadURL()
-              .then(res => {
-                const imgUrl = res;
-                putData(name, price, company, year, newFileName, imgUrl);
-              })
-              .then(() => {
-                $('#preview-image').html('');
-              })
-              .catch(err => {
-                console.error("Error put file" + err);
-              })
+        db.collection('cars').doc($('#id').val()).get()
+          .then(doc => {
+            const deleteFileName = doc.data().fileName;
+            storage.ref().child(`photo/${deleteFileName}`).delete()
+              .then(
+                fileSavePath.put(fileData)
+                  .then(snapshot => {
+                    snapshot.ref.getDownloadURL()
+                      .then(res => {
+                        const imgUrl = res;
+                        putData(name, price, company, year, newFileName, imgUrl);
+                      })
+                      .then(() => {
+                        $('#preview-image').html('');
+                      })
+                      .catch(err => {
+                        console.error("Error put file" + err);
+                      })
+                  })
+                  .catch(err => {
+                    console.error("Error getDownloadURL" + err);
+                  })
+              )
           })
-          .catch(err => {
-            console.error("Error getDownloadURL" + err);
-          })
+
       });
 
       document.querySelector('#searchBtn').addEventListener('click', () => {

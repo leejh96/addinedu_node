@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>인물 정보 관리 프로그램</title>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
+  <script defer src="/__/firebase/init.js?useEmulator=true"></script>
+  <script src="js/config.js" defer></script>
+  <script src="js/userSave.js" defer></script>
+  <script src="js/userGet.js" defer></script>
+
+
+
+</head>
+
+<body>
+  <h1>인물 정보 관리 프로그램</h1>
+  <div class="form">
+    <table border="1">
+      <tr>
+        <td>ObjectID</td>
+        <td id="firebaseId"></td>
+        <td rowspan="4" id="table-image" class="table-image">
+
+        </td>
+      </tr>
+      <tr>
+        <td>아이디</td>
+        <td><input type="text" id="userId" class="userId"></td>
+      </tr>
+      <tr>
+        <td>성명</td>
+        <td><input type="text" id="username" class="username"></td>
+      </tr>
+      <tr>
+        <td>이메일</td>
+        <td><input type="email" id="email" class="email"></td>
+      </tr>
+      <tr>
+        <td>사진</td>
+        <td><input type="file" name="img" id="imgSelector" class="imgSelector" multiple></td>
+        <td rowspan="2">상세정보 : 테이블 클릭하면 값이 채워짐<span></span></td>
+      </tr>
+      <tr>
+        <td>비밀번호</td>
+        <td>
+          <input type="password" id="password" class="password">
+          <div>
+            <input type="button" value="저장하기" id="saveBtn" class="saveBtn">
+            <input type="button" value="수정하기" id="editBtn" class="editBtn" disabled>
+          </div>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="list">
+    <table border="1" id="list-table" class="list-table">
+      <thead>
+        <tr>
+          <th>번호</th>
+          <th>사진</th>
+          <th>아이디</th>
+          <th>성명</th>
+          <th>이메일</th>
+          <th>삭제</th>
+        </tr>
+      </thead>
+      <tbody id="list-table-body">
+
+      </tbody>
+    </table>
+  </div>
+</body>
+
+</html>
