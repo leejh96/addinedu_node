@@ -1,4 +1,4 @@
-# Node
+# Client & Firebase
 
 ## 파일업로드(Client)
 
@@ -273,3 +273,51 @@ imagesRef(`photo/${imgUrl}`).delete()
   console.error('del Storage err' + err);
 })
 ```
+### Authentication
+firebase에서 제공하는 인증
+- 가장 일반적인 email, password로 하는 로그인 인증 제공
+- OAuth를 통한 로그인 인증 제공
+- 로그인 후 세션 구현 제공
+- 로그아웃 기능 제공
+
+**email password 회원가입**
+```
+await authService.createUserWithEmailAndPassword(email, password);
+```
+
+**email password 로그인 방식**
+```
+await authService.signInWithEmailAndPassword(email, password);
+```
+
+**SNS OAuth 로그인 방식**
+- 사전작업
+    - firebase console의 Authentication > sign-in method
+    - 제공업체 추가를 클릭하여 로그인 방식 설정 및 클라이언트 키 및 비밀번호 입력
+- OAuth의 provider를 가져오기 위해서는 firebase 객체를 사용해야 함
+- fbase.js 안에 firebaseInstance변수를 만들어 import한 firebase 객체를 담고 export
+```
+//fbase.js
+import firebase from "firebase/app";
+...
+export const firebaseInstance = firebase;
+```
+```
+//Auth.js
+import { authService, firebaseInstance } from 'fbase';
+if(name === 'google'){
+    provider = new firebaseInstance.auth.GoogleAuthProvider();
+}else if(name === 'github'){
+    provider = new firebaseInstance.auth.GithubAuthProvider();
+}
+//팝업창으로 통한 로그인
+const data = await authService.signInWithPopup(provider);
+```
+
+## React-Firebase
+
+### Deploy
+- React 파일을 bulid하여 build 폴더 생성
+- build 폴더 안에 firebase init 명령어 실행
+- React file build시 생성된 모든 파일을 firebase init 후 생긴 public 폴더에 붙여넣기
+- firebase deploy
