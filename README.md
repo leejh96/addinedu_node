@@ -280,13 +280,29 @@ firebase에서 제공하는 인증
 - 로그인 후 세션 구현 제공
 - 로그아웃 기능 제공
 
+```
+//fbase.js
+//firebase 설정파일
+import firebase from "firebase/app";
+...
+export const authService = firebase.auth();
+export const dbService = firebase.firestore();
+export const storageService = firebase.storage();
+export const firebaseInstance = firebase;
+export const firebaseInstance = firebase;
+```
+
 **email password 회원가입**
 ```
+import { authService } from 'fbase';
+
 await authService.createUserWithEmailAndPassword(email, password);
 ```
 
 **email password 로그인 방식**
 ```
+import { authService } from 'fbase';
+
 await authService.signInWithEmailAndPassword(email, password);
 ```
 
@@ -296,12 +312,7 @@ await authService.signInWithEmailAndPassword(email, password);
     - 제공업체 추가를 클릭하여 로그인 방식 설정 및 클라이언트 키 및 비밀번호 입력
 - OAuth의 provider를 가져오기 위해서는 firebase 객체를 사용해야 함
 - fbase.js 안에 firebaseInstance변수를 만들어 import한 firebase 객체를 담고 export
-```
-//fbase.js
-import firebase from "firebase/app";
-...
-export const firebaseInstance = firebase;
-```
+
 ```
 //Auth.js
 import { authService, firebaseInstance } from 'fbase';
@@ -314,6 +325,25 @@ if(name === 'google'){
 const data = await authService.signInWithPopup(provider);
 ```
 
+**로그인 유저 가져오기**
+```
+import { authService } from 'fbase';
+
+authService.onAuthStateChanged(user => {
+    if(user){
+        setIsLoggedIn(user);
+    }else{
+        setIsLoggedIn(false);
+    }
+})
+```
+
+**로그아웃**
+```
+import { authService } from 'fbase'
+
+await authService.signOut();
+```
 ## React-Firebase
 
 ### Deploy

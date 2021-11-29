@@ -5,7 +5,7 @@ import { authService, dbService, storageService} from 'fbase';
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(authService.currentUser);
   useEffect(() => {
-    //로그인세션 유지
+    //로그인 한 유저의 정보 가져오기
     authService.onAuthStateChanged(user => {
       if(user){
         setIsLoggedIn(user);
