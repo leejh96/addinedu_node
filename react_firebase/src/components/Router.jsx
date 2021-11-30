@@ -5,16 +5,16 @@ import Profile from 'routes/Profile';
 import Auth from 'routes/Auth';
 import EditProfile from 'routes/EditProfile';
 import Nav from './Nav';
-function Router({ isLoggedIn, setIsLoggedIn }) {
+function Router({ isLoggedIn, userObj }) {
     return (
         <BrowserRouter>
-        <Nav />
+            <Nav isLoggedIn={isLoggedIn}/>
             <Routes>
                 {
                     isLoggedIn ? 
                     <>
-                        <Route path='/' element={<Home />} />
-                        <Route  path='/profile' element={<Profile />} />
+                        <Route path='/' element={<Home userObj={userObj} />} />
+                        <Route path='/profile' element={<Profile />} />
                         <Route path='/edit' element={<EditProfile />} />
                     </>
                     :

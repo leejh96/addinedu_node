@@ -10,12 +10,11 @@ function Auth() {
         try {
             e.preventDefault();
             const { email, password } = input;
-            let data;
             const { id } = e.target;
             if( id === 'LoginForm'){
-                data = await authService.signInWithEmailAndPassword(email, password);
+                await authService.signInWithEmailAndPassword(email, password);
             }else if ( id === 'SignupForm'){
-                data = await authService.createUserWithEmailAndPassword(email, password);
+                await authService.createUserWithEmailAndPassword(email, password);
             }
         } catch (error) {
             setErr(error.message);
@@ -41,8 +40,7 @@ function Auth() {
                 provider = new firebaseInstance.auth.GithubAuthProvider();
             }
             //팝업창으로 로그인
-            const data = await authService.signInWithPopup(provider);
-            console.log(data);
+            await authService.signInWithPopup(provider);
         } catch (error) {
             setErr(error.message);
         }
