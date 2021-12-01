@@ -20,11 +20,15 @@ function Table({ board, onClickDelete, onClickEdit, userObj }) {
                             <td>{idx + 1}</td>
                             <td>{post.email}</td>
                             <td>{post.introduce}</td>
+                            { post.fileList.length > 0 ?
                             <td><img src={post.fileList[0].imgUrl} width='150' alt="설정이미지" /></td>
+                            :
+                            <td></td>
+                            }
                             { userObj.email === post.email ?
                                 <>
-                                    <td><button onClick={() => onClickEdit(post.id, post.email)}>수정</button></td>
-                                    <td><button onClick={() => onClickDelete(post.id, post.email, post.fileList[0].fileName)}>삭제</button></td>
+                                    <td><button onClick={() => onClickEdit(post.id, post.email, post.fileList)}>수정</button></td>
+                                    <td><button onClick={() => onClickDelete(post.id, post.email, post.fileList)}>삭제</button></td>
                                 </>
                                 :
                                 <>

@@ -1,7 +1,7 @@
 import { dbService, storageService } from 'fbase'
 import Table from './Table';
 import React, { useState, useEffect, useRef } from 'react'
-
+import { v4 as uuidv4 } from 'uuid';
 
 function Home({ userObj }) {
     const [introduce, setIntroduce] = useState('');
@@ -32,22 +32,29 @@ function Home({ userObj }) {
     const onSubmit = async(e) => {
         try {
             e.preventDefault();
-            // imgRef.current.files[0]
-            const imgName = imgRef.current.files[0].name;
-            const ext = imgName.substr(imgName.lastIndexOf('.'));
-            const newFileName = `${new Date().getTime()}${ext}`;
-            const fileSavePath = storageService.ref().child('react-image/' + newFileName)
-
-            const snapshot = await fileSavePath.put(imgRef.current.files[0])
-            const imgUrl = await snapshot.ref.getDownloadURL();
-            await dbService.collection('board').add({
-                email : userObj.email,
-                introduce,
-                fileList : [{
-                    fileName : newFileName,
-                    imgUrl
-                }]
-            });
+            if(imgRef.current.files[0]){
+                const imgName = imgRef.current.files[0].name;
+                const ext = imgName.substr(imgName.lastIndexOf('.'));
+                const newFileName = `${uuidv4()}${ext}`;
+                const fileSavePath = storageService.ref().child(`${userObj.email}/${newFileName}`)
+    
+                const snapshot = await fileSavePath.put(imgRef.current.files[0])
+                const imgUrl = await snapshot.ref.getDownloadURL();
+                await dbService.collection('board').add({
+                    email : userObj.email,
+                    introduce,
+                    fileList : [{
+                        fileName : newFileName,
+                        imgUrl
+                    }]
+                });
+            }else{
+                await dbService.collection('board').add({
+                    email : userObj.email,
+                    introduce,
+                    fileList : []
+                });
+            }
             introRef.current.value = '';
             imgRef.current.value = '';
             setPrevImg('');
@@ -57,23 +64,51 @@ function Home({ userObj }) {
 
     }
 
-    const onClickDelete = async(id, email, fileName) => {
+    const onClickDelete = async(id, email, fileList) => {
         if(userObj.email === email){
-            // dbService.doc(`board/${objId}`).delete()
-            await storageService.ref().child(`react-image/${fileName}`).delete()
-            await dbService.collection('board').doc(id).delete()
+            if(fileList.length){
+                // dbService.doc(`board/${objId}`).delete()
+                await storageService.ref().child(`${userObj.email}/${fileList[0].fileName}`).delete()
+                await dbService.collection('board').doc(id).delete()
+            }else{
+                await dbService.collection('board').doc(id).delete()
+            }
         }else{
             alert('내가 쓴 글이 아닙니다');
         }   
     }
 
-    const onClickEdit = async(id, email) => {
+    const onClickEdit = async(id, email, fileList) => {
         if(userObj.email === email){
-        
-            await dbService.collection('board').doc(id).set({
-                email : userObj.email,
-                introduce : introRef.current.value
-            })
+            if(imgRef.current.files[0]){
+                await storageService.ref().child(`${userObj.email}/${fileList[0].fileName}`).delete()
+                await dbService.collection('board').doc(id).delete()
+                const imgName = imgRef.current.files[0].name;
+                const ext = imgName.substr(imgName.lastIndexOf('.'));
+                const newFileName = `${uuidv4()}${ext}`;
+                const fileSavePath = storageService.ref().child(`${userObj.email}/${newFileName}`)
+    
+                const snapshot = await fileSavePath.put(imgRef.current.files[0])
+                const imgUrl = await snapshot.ref.getDownloadURL();
+                await dbService.collection('board').doc(id).set({
+                    email : userObj.email,
+                    introduce : introRef.current.value,
+                    fileList : [{
+                        fileName : newFileName,
+                        imgUrl
+                    }]
+                })
+            }else{
+                await dbService.collection('board').doc(id).set({
+                    email : userObj.email,
+                    introduce : introRef.current.value,
+                    fileList : []
+                })
+            }
+            introRef.current.value = '';
+            imgRef.current.value = '';
+            setPrevImg('');
+
         }else{
             alert('내가 쓴 글이 아닙니다');
         }
