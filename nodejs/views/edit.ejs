@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.24.0/axios.min.js"></script>
+    <title>자동차 수정 페이지</title>
+</head>
+
+<body>
+    <h1>자동차 내용 수정</h1>
+    <form method="post" id="carForm" action="/car/edit">
+        <!-- <form id="carForm"> -->
+        <input type="hidden" name="no" id="no" value="<%=no%>">
+        <table border="1">
+            <tr>
+                <th>차종</th>
+                <td><input type="text" name="name" value="<%=car.name%>" id="name"></td>
+            </tr>
+            <tr>
+                <th>가격</th>
+                <td><input type="text" name="price" value="<%=car.price%>" id="price"></td>
+            </tr>
+            <tr>
+                <th>제조사</th>
+                <td><input type="text" name="company" value="<%=car.company%>" id="company"></td>
+            </tr>
+            <tr>
+                <th>제조년도</th>
+                <td><input type="text" name="year" value="<%=car.year%>" id="year"></td>
+            </tr>
+        </table>
+        <button type="submit">저장</button>
+    </form>
+    <script>
+        // document.querySelector('#carForm').addEventListener('submit', (e) => {
+        //     e.preventDefault();
+        //     const no = document.querySelector('#no').value
+        //     const name = document.querySelector('#name').value
+        //     const price = document.querySelector('#price').value
+        //     const company = document.querySelector('#company').value
+        //     const year = document.querySelector('#year').value
+
+        //     axios.post('/car/edit', {
+        //         no, name, price, company, year
+        //     })
+        //         .then(res => {
+        //             if (res.data.success) {
+        //                 console.log(res)
+        //             }
+        //         })
+        // })
+    </script>
+</body>
+
+</html>

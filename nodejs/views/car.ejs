@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>자동차 종류</title>
+</head>
+
+<body>
+    <h1>
+        <%=title%>
+    </h1>
+    <ul>
+        <%carList.forEach((car, idx)=> {%>
+            <li>
+                No : <%=idx+1%><br>
+                    모델 : <a href="/car/detail?no=<%=idx+1%>">
+                        <%=car.name%>
+                    </a><br>
+                    가격 : <%=car.price%><br>
+                        제조년도 : <%=car.year%><br>
+            </li><br>
+            <%})%>
+    </ul>
+
+    <a href="/input.html">정보입력</a>
+</body>
+
+</html>
