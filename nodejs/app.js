@@ -2,7 +2,6 @@ const express = require('express');
 const app = express();
 const indexRouter = require('./routes');
 const carRouter = require('./routes/car');
-
 const path = require('path');
 
 app.set('views', path.join(__dirname, 'views'))
@@ -15,6 +14,8 @@ app.use(express.urlencoded({ extended: false }))
 app.use('/', indexRouter);
 app.use('/car', carRouter);
 
+
 app.listen(3000, () => {
     console.log('server on...');
 })
+

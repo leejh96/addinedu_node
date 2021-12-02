@@ -1,4 +1,4 @@
-# Client & Firebase
+# Firebase & Node
 
 ## 파일업로드(Client)
 
@@ -351,3 +351,8 @@ await authService.signOut();
 - build 폴더 안에 firebase init 명령어 실행
 - React file build시 생성된 모든 파일을 firebase init 후 생긴 public 폴더에 붙여넣기
 - firebase deploy
+
+## MongoDB
+- NoSQL Database
+- Nodejs와 사용할 경우 Mongojs, Mongodb, Mongoose 등의 패키지들과 사용가능
+- Mongodb 모듈에서 문자열로 ObjectId를 주면 값을 읽어오지 못하기 때문에 Mongodb.ObjectId(문자열)로 _id 값을 만들어줄 수 있음

@@ -11,9 +11,9 @@
 
 <body>
     <h1>자동차 내용 수정</h1>
-    <form method="post" id="carForm" action="/car/edit">
+    <form method="post" id="carForm" action="/car/edit/<%=car._id%>">
         <!-- <form id="carForm"> -->
-        <input type="hidden" name="no" id="no" value="<%=no%>">
+        <input type="hidden" name="_id" id="_id" value="<%=car._id%>">
         <table border="1">
             <tr>
                 <th>차종</th>

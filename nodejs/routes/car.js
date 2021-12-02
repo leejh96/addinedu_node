@@ -1,78 +1,82 @@
 const express = require('express');
 const router = express.Router();
-const carList = [
-    {
-        name: 'Sonata',
-        price: 2500,
-        company: 'HYUNDAI',
-        year: 2020
-    },
-    {
-        name: 'BMW',
-        price: 5500,
-        company: 'BMW',
-        year: 2021
-    },
-    {
-        name: 'Grandeur',
-        price: 3500,
-        company: 'HYUNDAI',
-        year: 2019
-    },
-]
 
-router.get('/', (req, res) => {
-    res.render('car', {
-        title: '자동차 리스트',
-        carList
+const mongodb = require('mongodb');
+const mongoClient = mongodb.MongoClient;
+const dbUrl = 'mongodb://localhost';
+const { selectAll, selectOne, update, insert, deleteFn } = require('../model/crud');
+const dbConnect = () => {
+    mongoClient.connect(dbUrl, (err, client) => {
+        if (err) {
+            console.log('error : ' + err);
+            throw err;
+        }
+        db = client.db('vehicle');
+        console.log('몽고디비 접속 성공');
+
+        router.get('/', (req, res) => {
+            selectAll(db, (err, arr) => {
+                if (err) throw err;
+                const carList = arr;
+                res.render('car', {
+                    title: '자동차 리스트',
+                    carList
+                })
+            })
+        });
+
+        router.get('/detail/:_id', (req, res) => {
+            const { _id } = req.params;
+            selectOne(db, _id, (err, data) => {
+                if (err) throw err;
+                res.render('detail', {
+                    title: '자동차 상세정보',
+                    detail: data,
+                    _id,
+                })
+            })
+        });
+
+        router.get('/edit/:_id', (req, res) => {
+            const { _id } = req.params;
+            selectOne(db, _id, (err, data) => {
+                if (err) throw err;
+                res.render('edit', {
+                    car: data,
+                })
+
+            })
+        })
+
+        router.get('/delete/:_id', (req, res) => {
+            const { _id } = req.params;
+            deleteFn(db, _id, (err, data) => {
+                if (err) throw err;
+                res.redirect('/car')
+            })
+        })
+
+        router.post('/', (req, res) => {
+            const { name, price, company, year } = req.body;
+            const carData = { name, price, company, year };
+            insert(db, carData, (err, result) => {
+                if (err) throw err;
+                res.redirect('/car');
+            })
+        })
+
+        router.post('/edit/:_id', (req, res) => {
+            const { _id } = req.params;
+            const { name, price, company, year } = req.body;
+            const carData = { name, price, company, year };
+            update(db, carData, _id, (err, data) => {
+                if (err) throw err;
+                res.redirect('/car')
+            })
+        })
     })
-});
+}
 
-router.get('/detail', (req, res) => {
-    const { no } = req.query;
-    res.render('detail', {
-        title: '자동차 상세정보',
-        detail: carList[parseInt(no) - 1],
-        no,
-    })
-});
+dbConnect();
 
-router.get('/edit/:no', (req, res) => {
-    const { no } = req.params
-    res.render('edit', {
-        car: carList[parseInt(no) - 1],
-        no
-    })
-})
-
-router.get('/delete/:no', (req, res) => {
-    const { no } = req.params;
-    carList.splice(parseInt(no) - 1, 1);
-    res.redirect('/car');
-})
-
-router.post('/', (req, res) => {
-    const { name, price, company, year } = req.body;
-    carList.push({
-        name,
-        price,
-        company,
-        year
-    })
-    res.redirect('/car')
-})
-
-router.post('/edit', (req, res) => {
-    const { no, name, price, company, year } = req.body;
-    carList[parseInt(no) - 1] = {
-        name,
-        price,
-        company,
-        year
-    }
-    // res.json({
-    //     success: true
-    // })
-    res.redirect('/car')
-})
 module.exports = router;

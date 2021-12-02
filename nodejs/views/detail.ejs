@@ -14,9 +14,9 @@
     </h1>
     <table border="1" style="text-align: center;">
         <tr>
-            <th>No</th>
+            <th>ObjectId</th>
             <td>
-                <%=no%>
+                <%=detail._id%>
             </td>
         </tr>
         <tr>
@@ -44,7 +44,7 @@
             </td>
         </tr>
     </table>
-    <a href="/car/edit/<%=no%>">수정</a> | <a href="/car/delete/<%=no%>">삭제</a> | <a href="/car">목록</a>
+    <a href="/car/edit/<%=_id%>">수정</a> | <a href="/car/delete/<%=_id%>">삭제</a> | <a href="/car">목록</a>
 </body>
 
 </html>

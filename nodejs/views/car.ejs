@@ -16,7 +16,7 @@
         <%carList.forEach((car, idx)=> {%>
             <li>
                 No : <%=idx+1%><br>
-                    모델 : <a href="/car/detail?no=<%=idx+1%>">
+                    모델 : <a href="/car/detail/<%=car._id%>">
                         <%=car.name%>
                     </a><br>
                     가격 : <%=car.price%><br>
