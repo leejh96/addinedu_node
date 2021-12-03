@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- Ajax는 주소창을 통해서 정식으로 요청하는 것이 아닌 Javascript를 통해서 백그라운드 요청을 하는 것 -->
+    <button type="button" id="readBtn">Ajax start!</button>
+    <script>
+        function MyAjax(method, url, toggle, callback) {
+            const xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = (e) => {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    callback(xhr.responseText);
+                }
+            }
+            xhr.open(method, url, toggle)
+            xhr.send();
+            // 요청을 보낼 위치 설정 , true면 비동기, false, 동기
+        }
+        // XMLHttpRequest 객체
+        // XMLHttpRequest 없다면 iframe태그 등을 이용한 비동기 통신 가능
+        // 요청 실행
+        document.querySelector('#readBtn').onclick = () => {
+            MyAjax('get', "http://localhost:3000/data/HONG/HELLO", true, (data) => {
+                console.log(data);
+            })
+        }
+    </script>
+</body>
+
+</html>

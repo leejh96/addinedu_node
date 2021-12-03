@@ -1,22 +1,18 @@
-import axios from 'axios';
 import React from 'react'
 import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../fbase';
 function Nav({ isLoggedIn, setIsLoggedIn, setUserObj }) {
     const navigate = useNavigate();
     const onClickLogout = () => {
-        axios.get('/api/user/signout')
-        .then(() => {
-            setIsLoggedIn(false)
-            setUserObj(null);
-            navigate('/')
-        })
-
+        authService.signOut()
+        navigate('/');
     }
     return (
         <nav>
             <ul>
                 <li><Link to='/'>홈</Link></li>
                 <li><Link to='/book'>책검색</Link></li>
+                <li><Link to='/like'>좋아요리스트</Link></li>
                 <li><Link to='/profile'>프로필</Link></li>
             </ul>
             {

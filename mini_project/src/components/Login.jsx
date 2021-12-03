@@ -1,20 +1,25 @@
 import React, { useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom';
+import { authService } from '../fbase';
 function Login({ setIsLoggedIn, setUserObj }) {
     const navigate = useNavigate();
     const [input, setInput] = useState({
         email : '',
         password : ''
     })
+    const [err, setErr] = useState('');
+
     const onClickLogin = () => {
         const { email, password } = input
-        axios.post('/api/user', { email, password })
-        .then(res => {
-            setUserObj(res.data.user);
-            setIsLoggedIn(true);
+        authService.signInWithEmailAndPassword(email, password)
+        .then((userCredential) => {
+            setIsLoggedIn(true)
+            setUserObj(userCredential.user);
             navigate('/');
         })
+        .catch((error) => {
+            setErr(error.message);
+        });
     }
     const onChangeInput = (e) => {
         const { name, value } = e.target
@@ -29,6 +34,7 @@ function Login({ setIsLoggedIn, setUserObj }) {
             <input type="password" name="password" id="password"  onChange={onChangeInput}/>
             <button type="button" onClick={onClickLogin}>로그인</button>
             <button type="button">구글로그인</button>
+            <div>{err}</div>
         </section>
     )
 }
