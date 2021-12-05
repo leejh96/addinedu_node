@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { authService } from '../fbase';
+import { authService, firebaseInstance } from '../fbase';
+import layout from '../css/login.module.css'
 function Login({ setIsLoggedIn, setUserObj }) {
     const navigate = useNavigate();
     const [input, setInput] = useState({
@@ -15,12 +16,24 @@ function Login({ setIsLoggedIn, setUserObj }) {
         .then((userCredential) => {
             setIsLoggedIn(true)
             setUserObj(userCredential.user);
-            navigate('/');
+            navigate('/chat');
         })
         .catch((error) => {
+            console.log(error);
             setErr(error.message);
         });
     }
+
+    const onClickGoogle = async() => {
+        try {
+            const provider = new firebaseInstance.auth.GoogleAuthProvider();
+            await authService.signInWithPopup(provider);
+            navigate('/chat');
+        } catch (error) {
+            setErr(error.message);
+        }
+    }
+
     const onChangeInput = (e) => {
         const { name, value } = e.target
         setInput({
@@ -29,12 +42,24 @@ function Login({ setIsLoggedIn, setUserObj }) {
         })
     }
     return (
-        <section>
-            <input type="text" name="email" id="email" onChange={onChangeInput}/>
-            <input type="password" name="password" id="password"  onChange={onChangeInput}/>
-            <button type="button" onClick={onClickLogin}>로그인</button>
-            <button type="button">구글로그인</button>
-            <div>{err}</div>
+        <section className={layout.wrap}>
+            <h1 className={layout.title}> 로그인</h1>
+            <div className={layout['email-input']}>
+                <input type="text" name="email" className={layout.email} placeholder="email" onChange={onChangeInput}/>
+            </div>
+            <div className={layout['password-input']}>
+                <input type="password" name="password" className={layout.password} placeholder="password"  onChange={onChangeInput}/>
+            </div>
+            <div className={layout['login-button']}>
+                <button type="button" className={layout.login} onClick={onClickLogin}>로그인</button>
+            </div>
+            <div className={layout['google-button']}>
+                <button type="button" className={layout.google} onClick={onClickGoogle}>Google Login</button>
+            </div>
+            <div className={layout['home-button']}>
+                <button type="button" className={layout.home} onClick={() => (navigate('/'))}>홈으로</button>
+            </div>
+            <div className={layout.error}>{err}</div>
         </section>
     )
 }

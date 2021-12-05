@@ -1,3 +1,37 @@
-.wrap {
-    margin : 0 auto;
+.title {
+    text-align: center;
+    font-size: 50px;
+    margin-bottom: 30px;
+    padding : 24px 36px
+}
+.wrap{
+    top: 350px;
+    margin: 0 auto;
+    background-color: rgb(247,218,217);
+    width: 700px;
+    height : 350px;
+    position : relative;
+    border-radius: 20px 20px 20px 20px;
+}
+.btnWrap{
+    text-align: center;
+}
+
+.chatGoBtn,
+.logoutBtn,
+.loginBtn,
+.registerBtn{
+    background-color: green;
+    border: none;
+    color: white;
+    padding: 15px 30px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    width: 500px;
+    border-radius: 10px 10px 10px 10px;
+
 }

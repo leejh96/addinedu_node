@@ -3,14 +3,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Home from './components/Home';
 import Login from './components/Login';
 import Register from './components/Register';
-import Profile from './components/Profile';
-// import Nav from './components/Nav'
-import { authService, dbService } from './fbase';
+import { authService  } from './fbase';
 import Chat from './components/Chat'
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userObj, setUserObj] = useState(null);
-
   useEffect(() => {
     //로그인 한 유저의 정보 가져오기
     authService.onAuthStateChanged(user => {
@@ -22,10 +19,8 @@ function App() {
       }
     })
   }, [])
-
   return (
     <BrowserRouter>
-      {/* <Nav isLoggedIn={isLoggedIn} setUserObj={setUserObj} setIsLoggedIn={setIsLoggedIn} /> */}
       <Routes>
         {isLoggedIn ?
           <>
@@ -37,8 +32,7 @@ function App() {
               />
             } />
             <Route path='/register' element={<Register />} />
-            <Route path="/chat" element={<Chat />} /> 
-            <Route path='/profile' element={<Profile />} />
+            <Route path="/chat" element={<Chat userObj={userObj}/>} /> 
           </>
           :
           <>

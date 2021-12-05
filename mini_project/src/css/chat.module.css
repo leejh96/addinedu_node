@@ -1,0 +1,125 @@
+.wrap{
+    text-align: center;
+    background-color: rgb(255,245,218);
+}
+.title{
+    font-size: 50px;
+    padding: 30px 0;
+    position: sticky;
+    background-color: rgb(206,220,195);
+    top: 0;
+    margin: 0;
+}
+.chat-section{
+    text-align: justify;
+    margin: 10px 200px 30px;
+    background-color : rgb(194,219,229);
+}
+.mychat{
+    display: flex;
+    align-items: flex-end;
+    font-size: 20px;
+    padding : 12px 16px;
+    flex-direction: column;
+}
+.mychat-detail{
+    background-color: rgb(242,218,0);
+    display: flex;
+    flex-direction: column;
+    padding : 12px 16px;
+    border-radius: 5px 5px 5px 5px;
+}
+
+.yourchat{
+    display: flex;
+    align-items: flex-start;
+    font-size: 20px;
+    padding : 12px 16px;
+    flex-direction: column;
+}
+.yourchat-detail{
+    background-color: rgb(255,255,255);
+    display: flex;
+    flex-direction: column;
+    padding : 12px 16px;
+    border-radius: 5px 5px 5px 5px;
+}
+.delete-wrap{
+    text-align: right;
+    padding: 12px;
+}
+.delete{
+    background-color: rgb(185,191,183);
+    color : red;
+}
+
+.img{
+    margin-bottom: 10px;
+}
+
+.input{
+    display: flex;
+    margin: 0 150px;
+    height: 100px;
+    padding : 0;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+.text {
+    height: 100%;
+    font-size: 20px;
+    resize: none;
+    width: 60%;
+    padding: 10px;
+    margin-right: 10px;
+}
+
+.filebox{
+    width: 50%;
+    margin-right: 10px;
+    display: flex;
+}
+.file-list{
+    width: 70%;
+    border: 0;
+    font-size: 20px;
+}
+.filebox label {
+    display: inline-block;
+    color: #fff;
+    background-color: #535a3b;
+    cursor: pointer;
+    width: 30%;
+    padding: 30px 0;
+    font-size: 30px;
+}
+
+.img-selector {
+    position: absolute;
+    width: 0;
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+}
+
+.send{
+    font-size: 30px;
+    width: 15%
+}
+
+.home-section{
+    display: flex;
+    justify-content: center;
+    padding-bottom: 50px;
+}
+.home{
+    font-size: 40px;
+    background: none;
+    border: 0;
+    cursor: pointer;
+}
+
+.home:hover{
+    color: gray
+}
