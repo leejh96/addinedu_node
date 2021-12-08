@@ -6,31 +6,199 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 
-<body>
-    <!-- Ajax는 주소창을 통해서 정식으로 요청하는 것이 아닌 Javascript를 통해서 백그라운드 요청을 하는 것 -->
-    <button type="button" id="readBtn">Ajax start!</button>
+<body class="container">
+    <h1>Ajax 연습</h1>
+    <br />
+    <div>
+        사용자: <input type="text" id="user" value="홍길동" /><br />
+        메세지: <input type="text" id="message" value="사랑합니다" /><br /><br />
+        <button id="readBtn" class="btn btn-danger">메세지추가</button>
+        <hr>
+        <button class="choiceDel">선택 삭제</button> |
+        검색 : <select class="keyword">
+            <option value="name">이름</option>
+            <option value="message">메시지</option>
+        </select>
+        <input type="text" class=".search">
+        <table id="msg_list" border="1" class="table table-hover"></table>
+    </div>
+    <address>(c)comstudy21.or.kr</address>
+
+    <script src=" http://code.jquery.com/jquery.js">
+    </script>
     <script>
-        function MyAjax(method, url, toggle, callback) {
+        var msgListDOM = document.getElementById("msg_list");
+
+        function myGet(url, callback) {
             const xhr = new XMLHttpRequest();
-            xhr.onreadystatechange = (e) => {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    callback(xhr.responseText);
+            xhr.onreadystatechange = function (event) {
+                if (this.readyState === 4 && this.status === 200) {
+                    callback(this.responseText, true, this);
                 }
-            }
-            xhr.open(method, url, toggle)
+            };
+            xhr.open("GET", url, true);
             xhr.send();
-            // 요청을 보낼 위치 설정 , true면 비동기, false, 동기
         }
-        // XMLHttpRequest 객체
-        // XMLHttpRequest 없다면 iframe태그 등을 이용한 비동기 통신 가능
-        // 요청 실행
-        document.querySelector('#readBtn').onclick = () => {
-            MyAjax('get', "http://localhost:3000/data/HONG/HELLO", true, (data) => {
-                console.log(data);
-            })
+
+        $('.search').on('keyup', (e) => {
+            console.log(e.target.value)
+        })
+        const showList = function (data, status, xhr) {
+            var msgArr = JSON.parse(data.trim());
+            $("#msg_list").html(`<tr>
+                <th><input type="checkbox" class="noCheckAll" /></tn>
+                <th width="10%">번호</th>
+                <th width="20%">작성자</th>
+                <th width="30%">메세지</th>
+                <th width="20%">벌점</th>
+                <th width="10%">삭제</th>
+                <th width="10%">수정</th>
+            </tr>`);
+            for (var i = 0; i < msgArr.length; i++) {
+                rowTag = `<tr>
+                    <td><input type="checkbox" data-no="${msgArr[i].no}" class="noCheck" /></td>
+                    <td>${msgArr[i].no}</td>
+                    <td class="userCell">${msgArr[i].user}</td>
+                    <td class="msgCell">${msgArr[i].msg}</td>
+                    <td>
+                        <select data-no="${msgArr[i].no}" class="score" name="score">
+                            <option value="0">0</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                        </select>
+                    </td>
+                    <td><input data-no="${msgArr[i].no}" class="delBtn" type="button" value="delete"/></td>
+                    <td><button data-no="${msgArr[i].no}" class="editBtn">edit</button></td>
+                    </tr>`;
+                $('#msg_list').append(rowTag);
+            } // end of for
+
+            $("button.choiceDel").on('click', function (event) {
+                //var selectedNo = [];
+                $("input[type=checkbox].noCheck").each((idx, element) => {
+                    if ($(element).prop("checked") == true) {
+                        //selectedNo.push()
+                        var url = "http://localhost:3000/delete/" + $(element).attr("data-no");
+                        console.log(url);
+                        myGet(url, function (data, status, xhr) {
+                            //
+                        });
+                    }
+                });
+
+                loadData();
+            });
+
+            $("input[type=checkbox].noCheckAll").on('click', function (event) {
+                $("input[type=checkbox].noCheck").prop("checked", $(this).prop("checked"));
+            });
+
+            for (var i = 0; i < msgArr.length; i++) {
+                $("select.score:nth(" + i + ")>option:nth(" + msgArr[i].score + ")").prop("selected", "selected")
+            }
+
+            $("button.editBtn").on("click", function (event) {
+                // 화살표 함수에서 this는 window이다.
+                console.log(event.target.dataset.no);
+                if ($(this).text() == "edit") {
+                    $(this).text("ok");
+
+                    var $tr = $(this).parent().parent();
+                    var user = $tr.find("td.userCell").text();
+                    var msg = $tr.find("td.msgCell").text();
+                    $tr.find("td.userCell").html(`<input name='newUser' value="${user}" />`);
+                    $tr.find("td.msgCell").html(`<input name='newMsg' value="${msg}" />`);
+                } else {
+                    // 서버에 적용 해당 데이터 갱신
+                    var no = event.target.dataset.no
+                    var $tr = $(this).parent().parent();
+                    var newUser = $tr.find("input[name=newUser]").val();
+                    var newMsg = $tr.find("input[name=newMsg]").val();
+                    var score = $tr.find("select[name=score]").val();
+
+                    // 서버에서 적용하도록 Ajax로 처리한다.
+                    var url = `http://localhost:3000/update/${no}/${newUser}/${newMsg}/${score}`;
+                    myGet(url, function (data, status, xhr) {
+                        // 수정된 레코드만 바뀌게 하기
+                        var rowData = JSON.parse(data.trim());
+                        var $tr = $(event.target).parent().parent();
+                        $tr.find("td.userCell").html(rowData.user);
+                        $tr.find("td.msgCell").html(rowData.msg);
+                        $(event.target).text("edit");
+                    });
+                }
+            });
+
+            $('select.score').on('change', (event) => {
+                //console.log(event.target.value, event.target.dataset.no);
+                // 서버에 score를 전송한다. 
+                // 서버의 리스트에 반영한다.
+                // 그 결과를 받아서 select에 적용한다.
+                // showList()호출
+                var no = event.target.dataset.no;
+                var value = event.target.value
+                url = "http://localhost:3000/score/" + no + "/" + value;
+                myGet(url, (data, status, xhr) => {
+                    if (status) {
+                        showList(data, status, xhr);
+                    }
+                });
+            });
+
+            $("input.delBtn").on('click', (event) => {
+                //console.log(event.target.dataset.no)
+                // event.target 구조분해 할당
+                const {
+                    dataset: {
+                        no,
+                    }
+                } = event.target;
+
+                var url = "http://localhost:3000/delete/" + no;
+                myGet(url, (data, status, xhr) => {
+                    if (status) {
+                        showList(data, status, xhr);
+                    }
+                });
+            });
         }
+
+        var loadData = function () {
+            // Ajax를 이용해서 서버에서 array를 받아온다.
+            // 그 데이터를 table에 적용한다.
+            myGet(`http://localhost:3000/loadData`, showList);
+        }
+
+        loadData();
+
+        document.querySelector('#readBtn').onclick = function () {
+            console.log("버튼을 눌렀다!");
+            var user = document.getElementById("user").value;
+            var message = document.getElementById("message").value;
+            myGet(`http://localhost:3000/data/${user}/${message}`, function (data, status, xhr) {
+                // data가 array이고 그 내용을 table에 추가한다.
+                showList(data, status, xhr);
+                // input 창 초기화
+                document.getElementById("user").value = "";
+                document.getElementById("message").value = "";
+            });
+        }
+
+        $(window).on('keydown', function (event) {
+            if (event.keyCode === 13) {
+                // trigger or 함수 호출
+                $('#readBtn').trigger("click");
+            }
+        })
     </script>
 </body>
 

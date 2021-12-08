@@ -1,0 +1,26 @@
+.wrap {
+    display: flex;
+    margin-bottom: 30px;
+}
+.form{
+    display: flex;
+    flex-direction: column;
+}
+.id,
+.name,
+.email,
+.password,
+.photo,
+.objId{
+    display: flex;
+    justify-content: space-between;
+}
+.table{
+    border-collapse: collapse;
+    width: 100%;
+    text-align: center;
+}
+.deleteSection{
+    display: flex;
+    flex-direction: column;
+}

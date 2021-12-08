@@ -179,14 +179,17 @@ function Chat({ userObj }) {
                                     ))
                                 }
                                 <div>
-                                    {chat.chat.split('\n').map((item, idx) => {
-                                        return (
-                                            <span key={idx}>
-                                                {item}
-                                                <br/>
-                                            </span>
-                                        )
-                                    })}
+                                    {
+                                        chat.chat.split('\n').map((item, idx) => (
+                                            chat.chat &&
+                                            (
+                                                <span data-doc={chat.docId} key={idx}>
+                                                    {item}
+                                                    <br/>
+                                                </span>
+                                            )
+                                        ))
+                                    }
                                 </div>
                             </div>
                         </div>
