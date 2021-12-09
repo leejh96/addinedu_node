@@ -20,12 +20,12 @@
         메세지: <input type="text" id="message" value="사랑합니다" /><br /><br />
         <button id="readBtn" class="btn btn-danger">메세지추가</button>
         <hr>
-        <button class="choiceDel">선택 삭제</button> |
-        검색 : <select class="keyword">
-            <option value="name">이름</option>
-            <option value="message">메시지</option>
-        </select>
-        <input type="text" class=".search">
+        <button class="choiceDel">선택 삭제</button>
+        | 검색 :
+        <select class="keyword">
+            <option value="user">이름</option>
+            <option value="msg">내용</option>
+        </select> <input type="text" class="search" />
         <table id="msg_list" border="1" class="table table-hover"></table>
     </div>
     <address>(c)comstudy21.or.kr</address>
@@ -46,9 +46,22 @@
             xhr.send();
         }
 
-        $('.search').on('keyup', (e) => {
-            console.log(e.target.value)
-        })
+        $("input.search").on("keyup", function (event) {
+            var word = event.target.value;
+            var keyword = $("select.keyword").val();
+            // Ajax를 이요해서 서버에서 검색 결과를 가져와서 showList한다.
+            if (word.length > 0) {
+                var url = `http://localhost:3000/search/${keyword}/${word}`;
+                myGet(url, function (data, status, xhr) {
+                    if (status) {
+                        showList(data, status, xhr);
+                    }
+                });
+            } else {
+                loadData();
+            }
+        });
+
         const showList = function (data, status, xhr) {
             var msgArr = JSON.parse(data.trim());
             $("#msg_list").html(`<tr>
@@ -131,8 +144,9 @@
                         // 수정된 레코드만 바뀌게 하기
                         var rowData = JSON.parse(data.trim());
                         var $tr = $(event.target).parent().parent();
-                        $tr.find("td.userCell").html(rowData.user);
-                        $tr.find("td.msgCell").html(rowData.msg);
+                        $tr.find("td.userCell").html(rowData[0].user);
+                        $tr.find("td.msgCell").html(rowData[0].msg);
+
                         $(event.target).text("edit");
                     });
                 }

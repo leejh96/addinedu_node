@@ -9,10 +9,27 @@ const router = express.Router();
 // npm install -S cors
 const cors = require("cors");
 
+// mysql_conn_test01.js
+const mysql = require("mysql");
+
+const dao = require("./db_message");
+
+// pool 생성
+const pool = mysql.createPool({
+    connection: 10,
+    host: "localhost",
+    user: "root",
+    password: "123123",
+    database: "test",
+    debug: false,
+    port: 5306
+});
+
 app.set("port", 3000);
 
 // 크로스 도메인 문제를 해결 해 주는 미들웨어 등록
 app.use(cors());
+app.use(express.static("public"));
 
 router.route("/").get((req, res) => {
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
@@ -25,25 +42,37 @@ var msg_list = [
     { no: 2, user: "PARK", msg: "I love you", score: 5 },
 ];
 
-var noSeq = 3;
-
+// insert 부분
 //http://localhost:3000/data/KIM/LOVE
 router.route("/data/:user/:msg").get((req, res) => {
-    // 전달받은 데이터를 추가하고 msg_list 전송
-    var data = {
-        no: noSeq++,
-        user: req.params.user,
-        msg: req.params.msg,
-        score: 0,
-    };
-    // data를 msg_list에 추가한다.
-    msg_list.push(data);
-    res.send(msg_list);
+    var user = req.params.user;
+    var message = req.params.msg;
+    if (pool) {
+        dao.insertMsg(pool, user, message, function (err, result) {
+            if (err) throw err;
+            // 입력이 끝난 후 목록을 보내 준다.
+            dao.selectAll(pool, function (err2, result) {
+                res.send(result);
+            });
+        });
+    }
 });
 
 router.route("/loadData").get((req, res) => {
     // msg_list를 전송한다.
-    res.send(msg_list);
+    dao.selectAll(pool, function (err, result) {
+        if (err) throw err;
+        res.send(result);
+    });
+});
+
+router.route("/search/:keyword/:word").get((req, res) => {
+    var keyword = req.params.keyword;
+    var word = req.params.word;
+    dao.selectSearch(pool, keyword, word, (err, data) => {
+        if (err) throw err
+        res.send(data);
+    })
 });
 
 const findIndex = (no) => {
@@ -59,32 +88,27 @@ const findIndex = (no) => {
 
 router.route("/delete/:no").get((req, res) => {
     var no = req.params.no;
-    // no와 index는 일치하지 않는다.
-    var index = findIndex(no);
-    // index를 이용해서 배열에서 해당 요소를 삭제
-    msg_list.splice(index, 1);
-    // 결과를 출력
-    res.send(msg_list);
-});
-
-//http://localhost:3000/data/KIM/LOVE
-router.route("/data2/:user/:msg").get((req, res) => {
-    let user = req.params.user;
-    let msg = req.params.msg;
-    res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
-    res.write(`{"USER":"${user}", "MESSAGE":"${msg}"}`);
-    res.end();
+    if (pool) {
+        dao.deleteMsg(pool, no, function (err, result) {
+            if (err) throw err;
+            dao.selectAll(pool, function (err2, result2) {
+                res.send(result2);
+            });
+        });
+    }
 });
 
 // score 반영
 router.route("/score/:no/:value").get((req, res) => {
     var no = req.params.no;
     var value = req.params.value;
-    // score를 msg_list에 반영하기
-    var index = findIndex(no);
-    msg_list[index].score = value;
-
-    res.send(msg_list);
+    dao.updateScore(pool, no, value, (err, data) => {
+        if (err) throw err;
+        dao.selectAll(pool, function (err, result) {
+            if (err) throw err;
+            res.send(result);
+        });
+    })
 });
 
 // 수정기능
@@ -93,14 +117,13 @@ router.route("/update/:no/:user/:msg/:score").get((req, res) => {
     var user = req.params.user;
     var msg = req.params.msg;
     var score = req.params.score;
-
-    var index = findIndex(no);
-    if (index != -1) {
-        msg_list[index].user = user;
-        msg_list[index].msg = msg;
-        msg_list[index].score = score;
-    }
-    res.send(msg_list[index]);
+    dao.updateMsg(pool, no, user, msg, (err, data) => {
+        if (err) throw err;
+        dao.selectOne(pool, no, function (err2, result2) {
+            console.log(result2)
+            res.send(result2);
+        });
+    })
 });
 
 app.use("/", router);
